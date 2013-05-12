@@ -275,10 +275,8 @@
             }
         });
         
-        // Test
         $this.on(EventActions.CLICK, classes.searchBtn, function(e) {
             e.preventDefault();
-            insertTag.call(self, Math.ceil(Math.random()*9999));
         });
     }
 
