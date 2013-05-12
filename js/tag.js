@@ -507,17 +507,6 @@
             $.error( 'Method \'' +  method + '\' does not exist on jQuery.tagInput' );
         }
     }
-    
-    var tester = $('.test1');
-    // Init
-    tester.tagInput();
-    // Import the data
-    tester.tagInput('importData', ['text1', 'text2', 'text3']);
-    
-    
-    var tester2 = $('.test2');    
-    tester2.tagInput();
-    tester2.tagInput('importData', ['text1', 'text2', 'text3', 'text4', 'text5', 'text6', 'text7', 'text8', 'text9', 'text10']);
 
     /*!
      *TODO
