@@ -24,17 +24,15 @@
     -webkit-box-shadow: 0 1px 0 rgba(255, 255, 255, 1);
     box-shadow:         0 1px 0 rgba(255, 255, 255, 1);
     
-    /* nanoScroller */
-    padding: 0;
+    overflow: hidden;
 }
 
 .input-tag-wrapper .input-tag-content {
     width: 90%;
     float: left;
-    
-    /* nanoScroller */
-    width: 110%;
-    left: 3px;
+}
+.input-tag-wrapper .input-tag-content::-webkit-scrollbar {
+  visibility: hidden;
 }
 
 /* Magnifying Glass */
@@ -54,12 +52,6 @@
     cursor: pointer;
     border: none;
     text-indent: -9999px;
-    
-    /* nanoScroller */
-    position: absolute;
-    float: right;
-    right: 12px;
-    margin-left: 0;
 }
 .input-tag-wrapper button.input-tag-search:hover {
     background-position: 0 -16px; 
@@ -69,20 +61,18 @@
 /* Tags List */
 .input-tag-wrapper ul {
     display: block;
-    margin:  3px 0;
+    margin:  0;
     padding: 0;
     list-style: none;
     float: left;
     clear: both;
-    
-    /* nanoScroller */
-    /*width: 265px;*/
 }
 .input-tag-wrapper ul li {
-    margin:  0 6px 0 0;
+    margin:  3px 6px 3px 0;
     padding: 0;
     float: left;
 }
+/*Input field*/
 .input-tag-wrapper ul li:last-child {
     margin: 0;
 }
@@ -170,7 +160,6 @@
 /* Input Field */
 .input-tag-wrapper input {
     /* Display & box model */
-    width: 80%;
     height: 24px; /* Same as the row ul */
     margin: 3px 0;
     padding: 0 5px;

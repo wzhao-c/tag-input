@@ -1,41 +1,44 @@
 <html>
     <head>
-        <link href="css/nanoscroller.css" media="all" rel="stylesheet" type="text/css">
         <link href="css/tag.css" media="all" rel="stylesheet" type="text/css">
     </head>
     <body>
-        <div class="input-tag-wrapper nano test1">
-            <div class="input-tag-content content">
-                <input class="input-tag-input" placeholder="Type something" value="" >
+        <div class="input-tag-wrapper test1">
+            <div class="input-tag-content">
+                <ul>
+                    <li><input class="input-tag-input" placeholder="Type something" value="" ></li>
+                </ul>
             </div>
             
             <button class="input-tag-search">Search</button>            
         </div>
         
-        <div class="input-tag-wrapper nano test2">
-            <div class="input-tag-content content">
-                <input class="input-tag-input" placeholder="Type something" value="" >
+        <!--<div class="input-tag-wrapper test2">
+            <div class="input-tag-content">
+                <ul>
+                    <li><input class="input-tag-input" placeholder="Type something" value="" ></li>
+                </ul>
             </div>
             
             <button class="input-tag-search">Search</button>
-        </div>
+        </div>-->
         
         <script type="text/javascript" src="js/lib/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="js/lib/jquery.nanoscroller.min.js"></script>
         <script type="text/javascript" src="js/tag.js"></script>
         
         <script>
             (function() {
                 var tester = $('.test1');
                 // Init
-                tester.tagInput();
-                // Import the data
-                tester.tagInput('importData', ['text1', 'text2', 'text3']);
+                tester.tagInput({
+                    callURL: 'http://echo.jsontest.com/key/value/one/two/name/mac',
+                    localStore: false,
+                    autoSearch: false
+                });
                 
-                
-                var tester2 = $('.test2');    
-                tester2.tagInput();
-                tester2.tagInput('importData', ['text1', 'text2', 'text3', 'text4', 'text5', 'text6', 'text7', 'text8', 'text9', 'text10']);
+                //var tester2 = $('.test2');    
+                //tester2.tagInput();
+                //tester2.tagInput('importData', ['text1', 'text2', 'text3', 'text4', 'text5', 'text6', 'text7', 'text8', 'text9', 'text10']);
             })(jQuery)
         </script>
     </body>

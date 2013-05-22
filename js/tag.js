@@ -20,7 +20,8 @@
     Tag.prototype = {
         /*!
          * Method to load
-         * \return object
+         * 
+         * @return object
          */
         load: function(data) {
             var self = this;            
@@ -40,7 +41,8 @@
         
         /*!
          * Method to build the single tag jQuery object
-         * \return string || null
+         * 
+         * @return string || null
          */
         buildHTML: function() {
             var self = this,
@@ -61,9 +63,10 @@
         
         /*!
          * Method to set the current link
-         * \param string url
-         * \param isAbsoluteLink
-         * \return object
+         * 
+         * @param string url
+         * @param isAbsoluteLink
+         * @return object
          */
         setLink: function() {
             var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
@@ -86,7 +89,8 @@
         
         /*!
          * Method to get the tag's text
-         * \return string
+         * 
+         * @return string
          */
         getText: function() {
             // Trim the text
@@ -94,72 +98,32 @@
             
             // Limit the text length
             return (text.length > Tag.Text.MAX) ? text.slice(0, (Tag.Text.MAX - 3)) + '...' : text;
-        },
-        
-        /*!
-         * Method to get width of the tag's text
-         * \return int
-         */
-        getTextWidth: function(font) {
-            var body = $(document.body),
-                textHTML = '<span>' + this.getText() + '</span>',
-                textWrap = body.append(textHTML).find('span:last'),
-                _font = {
-                    'font-family': 'Arial',
-                    'font-size': 12
-                };
-            
-            if (font && $.type(font) === 'object') {
-                $.extend(_font, font);
-            }
-            
-            // Apply font CSS to the text and get the width
-            var width = textWrap.css(_font).width();
-            
-            // Clean up the temp HTML code.
-            body.find('span:last').remove();
-            return width;
         }
     }
     
-    var Config, CallMethods, Keys, EventActions;
+    /*!
+     * URL Parameter Model
+     */
+    function Parameter(term) {
+        this.searchTerm = term;
+        this.params = {};
+    }
     
-    // Default settings and classes
-    Config = {
-        settings: {
-            wrapperWidth:      300,
-            contentWidth:      260,
-            minInputWidth:     60,
-            rowHeight:         30,
-            numRows:           3,
-            
-            // For row width calculation
-            tagFontSize:       12,
-            tagFontFamily:     'Arial',
-            tagPadding:        [0, 5, 0, 5], // top, rgt, btm, lft
-            tagBorder:         1,
-            tagSpace:          6, // ul li margin-right
-            closeSize:         [12, 12], // width, height
-            closePadding:      [0, 0, 0, 5], // top, rgt, btm, lft
-            
-            placeHolder:       '',
-            
-            callUrl:           '',
-            callMethod:        '',
-            localStore:        false,
-            
-            onTagAdded:        $.noop,
-            onTagRemoved:      $.noop,
-            onSearchCompleted: $.noop
+    Parameter.prototype = {
+        addParam: function(name, value) {
+            this.params[name] = value;
         },
-        
-        classes: {
-            content:   '.input-tag-content',
-            input:     '.input-tag-input',
-            searchBtn: '.input-tag-search',
-            closeBtn:  '.input-tag-close'
+        removeParam: function(name) {
+            delete this.params[name];
+        },
+        getParams: function() {
+            return this.params;
+        },
+        getTerm: function() {
+            return this.searchTerm;
         }
     }
+    
     
     // Constants
     CallMethods = {
@@ -182,13 +146,35 @@
         KEYUP:   'keyup',
         SUBMIT:  'submit'
     }
+
+    var Config, CallMethods, Keys, EventActions;
+    
+    // Default settings
+    Config = {
+        wrapperWidth:      300,
+        contentWidth:      270,
+        minInputWidth:     30,
+        rowHeight:         30,
+        
+        placeHolder:       '',
+        
+        callURL:           '',
+        callMethod:        CallMethods.POST,
+        localStore:        true,
+        autoSearch:        true,
+        
+        onTagAdded:        $.noop,
+        onTagRemoved:      $.noop,
+        onSearchCompleted: $.noop
+    }
     
     // Public methods
     var Methods = {
         /*!
          * Method to import the data to tag object, store it to the data.tags
-         * \param array||object source
-         * \return void
+         *
+         * @param array||object source
+         * @return void
          */
         importData: function(source) {
             return this.each(function() {
@@ -198,24 +184,19 @@
                     _type = $.type(source);
                 
                 if ((_type == 'array' || _type == 'object') && data) {
-                    $.each(source, function() {
-                        var _tag = new Tag(this);
-                        
-                        if (!checkTagExist.call(self, _tag.text)) {
-                            data.tags.push(new Tag(this));
-                        }
-                    });
+                    loadTags.call(this, source);
                     
-                    renderTagRows.call(this);
-                    resetUI.call(this);
+                    renderTags.call(this);
                 } else {
                     $.error( 'Error occurs' );
                 }
             });
         },
+        
         /*!
          * Method to unset the current data
-         * \return void
+         *
+         * @return void
          */
         destory: function() {
             return this.each(function() {
@@ -242,67 +223,219 @@
                 data = $this.data('taginput');
             }
             
-            bindEvents.apply(this);
+            // Inintial the CSS
+            $this.css({
+                'width': data.config.wrapperWidth,
+                'height': data.config.rowHeight
+            });
+            $this.find('div').eq(0).css('width', data.config.contentWidth);
+            
+            bindEvents.call(this);
         });
     }
     
     function bindEvents() {
         var self = this,
             $this = $(this),
-            data = $this.data('taginput'),
-            classes = data.config.classes;        
+            data = $this.data('taginput');        
         
-        $this.on(EventActions.CLICK, classes.closeBtn, function(e) {                
+        // Close button - click
+        $this.on(EventActions.CLICK, 'i', function(e) {                
             deleteTag.call(self, $(this).closest('a').data('text'));
             e.preventDefault();
         });
         
-        $this.on(EventActions.KEYDOWN, classes.input, function(e) {
+        // Input field - keydown
+        $this.on(EventActions.KEYDOWN, 'input', function(e) {
             var keycode =  e.keyCode ? e.keyCode : e.which;
-                
+            var _val = $(this).val();
+            
             // Delete the last tag if user press delete or backspace
             if (keycode === Keys.DELETE || keycode === Keys.BACKSPACE) {
                 // Check if the input field is empty
-                if (!$(this).val()) {
-                    deleteTag.call(self, $(this).prev('ul').find('li:last a').data('text'));
+                if (!_val) {
+                    deleteTag.call(self, $(this).parent('li').prev().find('a').data('text'));
                     e.preventDefault();
                 }
             }
             
-            // User hit the enter
+            // User hit the enter, add a new tag
             if (keycode === Keys.ENTER) {
-                
+                if (_val) {
+                    insertTag.call(self, _val);
+                    $(this).val('');
+                }
             }
-        });
+        });        
         
-        $this.on(EventActions.CLICK, classes.searchBtn, function(e) {
+        // Input field - keyup
+        // for ajax call
+        if (data.config.autoSearch) {
+            $this.on(EventActions.KEYUP, 'input', function(e) {
+                var term = $(this).val(),
+                    parameter = new Parameter(term);
+                
+                delay(function() {
+                    //parameter.addParam('q', term);
+                    doSearch.call(self, parameter);
+                }, 800);
+                
+                e.preventDefault();
+            });
+        }
+        
+        // Search button - click
+        $this.on(EventActions.CLICK, 'button', function(e) {
+            var term = $this.find('input').val(),
+                parameter = new Parameter(term);
+            
+            //parameter.addParam('q', term);
+            doSearch.call(self, parameter);
+            
             e.preventDefault();
         });
     }
-
+    
+    var delay = (function(){
+        var timer = 0;
+        
+        return function(callback, ms){
+            clearTimeout(timer);
+            timer = setTimeout(callback, ms);
+        };
+    })();
+    
+    /*!
+     * Method to search the users
+     * If 'term' exists in the session storage, return the value.
+     * Otherwise do ajax call.
+     * 
+     * @param object parameter
+     * @return void
+     */
+    function doSearch(parameter) {
+        var self = this,
+            $this = $(this),
+            data = $this.data('taginput'),
+            returns = '',
+            promised = {};        
+        
+        if (parameter.getTerm()) {
+            if (data.config.localStore && (returns = sessionStorage.getItem(parameter.getTerm()))) {
+                promised = function() {
+                    var _dfd = new $.Deferred();
+                    
+                    loadTags.call(self, JSON.parse(returns));
+                    
+                    // Resolve the dferred obj
+                    _dfd.resolve();
+                    
+                    return _dfd.promise();
+                }();
+            } else {
+                // call function returns ajax obj
+                promised = ajaxCall(data.config.callMethod, data.config.callURL, parameter.getParams()).success(function(_data) {
+                    loadTags.call(self, _data);                    
+                    
+                    if (data.config.localStore) {
+                        saveToLocalStorage(parameter.getTerm(), JSON.stringify(data.tags));
+                    }
+                });
+            }
+            
+            // Display all the tags
+            promised.done(function() {
+                renderTags.call(self);
+            });
+        }
+    }
+    
+    /*!
+     * Ajax call
+     * 
+     * @param string method
+     * @param string url
+     * @param object parameters
+     * @return object
+     */
+    function ajaxCall(method, url, parameters) {
+        return $.ajax({
+            type: method,
+            url:  url,
+            dataType: 'json',
+            data: parameters
+        });
+    }
+    
+    /*!
+     * Function to save search results to the session storage
+     * 
+     * @param string q
+     * @param string|array content
+     * @return void
+     */
+    function saveToLocalStorage(q, content) {
+        var val = null,
+            type = $.type(content);        
+        
+        if (type === 'array' || type === 'object') {
+            val = JSON.stringify(content);
+        }
+        if (type === 'string') {
+            val = content;
+        }
+        
+        if (val) {
+            sessionStorage.setItem(q, val);
+        }
+    };
+    
+    /*!
+     * Method to load tags
+     *
+     * @param array objs
+     * @return void
+     */
+    function loadTags(objs) {
+        var $this = $(this),
+            data = $this.data('taginput');
+        
+        $.each(objs, function() {
+            var _tag = new Tag(this);
+            
+            if (!checkTagExist(data.tags, _tag.text)) {
+                data.tags.push(new Tag(this));
+            }
+        });
+    }
+    
     /*!
      * Method to insert a tag
-     * \param string text
-     * \return void
+     *
+     * @param string text
+     * @return void
      */
     function insertTag(tag) {
         var $this = $(this),
             data = $this.data('taginput'),
-            classes = data.config.classes,
             _tag = new Tag(tag);
             
-        if (_tag.text && !checkTagExist.call(this, _tag.text)) {            
+        if (_tag.text && !checkTagExist(data.tags, _tag.text)) {            
             data.tags.push(_tag);
+            
+            $('<li></li>', {
+                html: _tag.buildHTML()
+            }).insertBefore($this.find('input').parent('li'));
         }
         
-        renderTagRows.call(this);
         resetUI.call(this);
     }
     
     /*!
      * Method to unset the seleted tag from tags array, then rerender the tags list
-     * \param string text
-     * \return void
+     *
+     * @param string text
+     * @return void
      */
     function deleteTag(text) {
         var $this = $(this),
@@ -314,188 +447,123 @@
                 return tag.text != text;
             });
             
-            renderTagRows.call(this);
-            resetUI.call(this);
+            renderTags.call(this);
         }
     }
     
     /*!
-     * Method to check if the tag exists
-     * \param string text
-     * \return bool
+     * Method to check if the tag exists in the current tags array
+     *
+     * @param array tags
+     * @param string text
+     * @return bool
      */
-    function checkTagExist(text) {
-        var $this = $(this),
-            data = $this.data('taginput'),
-            result = false;
+    function checkTagExist(tags, text) {
+        var result = false;
         
-        $.each(data.tags, function() {
+        $.each(tags, function() {
             if (this.text == text) {
                 result = true;
             }
-        });            
+        });
         
         return result;
     }
     
+    /*!
+     * Method to reset the UI
+     *
+     * @return void
+     */
     function resetUI() {
         var $this = $(this),
             data = $this.data('taginput'),
-            classes = data.config.classes,
-            settings = data.config.settings,
-            $input = $this.find(classes.input),
-            $content = $this.find(classes.content),
-            currentNumRows = parseInt($this.height() / settings.rowHeight),
-            lastRowWidth = $content.find('ul').eq(-1).outerWidth(),
-            latestNumRows = $content.find('ul').length || 1;
+            $input = $this.find('input'),
+            $lastTag = $this.find('li').eq(-2),
+            numRows = 1;
         
-        // If input field is lower than the last tag row, add the input height to the total height
-        if (settings.contentWidth - lastRowWidth < settings.minInputWidth) {
-            $input.css('width', '80%');
-            latestNumRows++;
-        } else {
-            $input.css('width', (settings.contentWidth - lastRowWidth)).appendTo($content);
+        // Check the last tag exists
+        if ($lastTag.length) {
+            var lastRowWidth = $lastTag.position().left - $this.position().left + $lastTag.outerWidth(true) + 1; // plus 1px border
+            // Reposition the input field
+            $input.css('width',  (data.config.contentWidth - lastRowWidth > data.config.minInputWidth) ? data.config.contentWidth - lastRowWidth : '100%');
         }
         
-        if (latestNumRows != currentNumRows) {
-            $this.animate({ height: (((latestNumRows > settings.numRows) ? settings.numRows : latestNumRows) * settings.rowHeight) }, 200);
-        }
+        // Get total number of the tag rowsx
+        numRows += parseInt(($input.position().top - $this.position().top)/data.config.rowHeight, 10);        
         
-        focusInput.call(this);
-        //applyStyle.call(this);
+        // Change the height
+        $this.animate({ height: (numRows * data.config.rowHeight) }, 80);
     }
     
     /*!
-    * Function to display the tag rows
-    * \return void
-    */
-    function renderTagRows() {
+     * Function to display the tag rows
+     *
+     * @param array tags
+     * @return void
+     */
+    function renderTags() {
         var $this = $(this),
             data = $this.data('taginput'),
-            settings = data.config.settings,
-            tagWrapWidth = settings.tagPadding[3] + settings.tagPadding[1] + settings.tagBorder * 2 + settings.tagSpace + 
-                           settings.closePadding[3] + settings.closePadding[1] + settings.closeSize[0],
-            currentRowWidth = 0,
-            currentRowEls = [],
-            html = '';        
+            els = [];        
         
-        // Remove tag rows
-        removeTagRows.call(this);
+        removeTags.call(this);
         
-        if (data.tags.length > 0) {
+        if (data.tags.length) {
             $.each(data.tags, function() {
-                // Get current tag width and tag HTML
-                var _elWidth = this.getTextWidth({ 'font-family': settings.tagFontFamily, 'font-size': settings.tagFontSize }) + tagWrapWidth,
-                    _elHtml = this.buildHTML();
-                
-                // Add to the current row width
-                currentRowWidth += _elWidth;
-                currentRowEls.push('<li>' + _elHtml + '</li>');                
-                
-                if (currentRowWidth > settings.contentWidth) {
-                    // Remove the current element
-                    currentRowEls.pop();
-                    
-                    // Build the row html
-                    html += buildTagRow(currentRowEls);
-                    
-                    // Reset the row width and elements
-                    currentRowWidth = _elWidth;                        
-                    currentRowEls = ['<li>' + _elHtml + '</li>'];
-                }
-                
-                // If current tag is the last element in tags array                
-                if (this == data.tags[data.tags.length - 1]) {                    
-                    html += buildTagRow(currentRowEls);
-                }
-            });
+                els.push('<li>' + this.buildHTML() + '</li>');
+            });            
             
             // Display the tag rows to the content
-            $this.find(data.config.classes.content).prepend(html);
+            $this.find('ul').prepend(buildTags(els));
         }
-    }
-    
-    function removeTagRows() {
-        var $this = $(this),
-            data = $this.data('taginput'),
-            classes = data.config.classes;
         
-        $this.find(classes.content).find('ul').remove();
+        resetUI.call(this);
+    }
+
+    /*!
+     * Method to remove all the tags.
+     *
+     * @return void
+     */
+    function removeTags() {
+        var $this = $(this);
+        
+        $this.find('li').filter(function() {
+            return $(this).find('a').length;
+        }).remove();
     }
     
     /*!
-     * Method to apply the CSS style
-     * \return void
-     */
-    function applyStyle() {
-        var $this = $(this),
-            data = $this.data('taginput'),
-            classes = data.config.classes,
-            settings = data.config.settings,
-            $content = $this.find(classes.content);
-        
-        $content.find('li').css({
-            'marginRight':  settings.tagSpace
-        }).find('a').css({
-            'padding':      settings.tagPadding.join('px ') + 'px',
-            'border-width': settings.tagBorder
-        }).find('span').css({
-            'padding':      settings.closePadding.join('px ') + 'px'
-        }).find('i').css({
-            'width':        settings.closeSize[0],
-            'height':       settings.closeSize[1]
-        });
-    }
-    
-     /*!
      * Method to focus to the input field
-     * \return void
+     *
+     * @return void
      */
     function focusInput() {
         var $this = $(this),
             data = $this.data('taginput');
         
-        $this.find(data.config.classes.input).focus();
+        $this.find('input').focus();
     }
     
     /*!
-    * Function to generate the single tag row
-    * \param object|string tagsHTML
-    * \return string
-    */
-    function buildTagRow(rowHTML) {
+     * Function to generate the tags HTML
+     *
+     * @param object|string els
+     * @return string
+     */
+    function buildTags(els) {
         var html = '';
         
-        if ($.type(rowHTML) === 'string') { html = rowHTML; }
-        if ($.type(rowHTML) === 'array') { html = rowHTML.join(''); }
+        if ($.type(els) === 'string') { html = els; }
+        if ($.type(els) === 'array') { html = els.join(''); }
         
-        return (html) ? '<ul>' + html + '</ul>' : '';            
+        return (html) ? html : '';            
     }
     
     /*!
-    * Function to save search results to the session storage
-    * \param string q
-    * \param string|array content
-    * \return void
-    */
-    function saveToLocalStorage(q, content) {
-        var key = $.trim(q),
-            val = null
-            type = $.type(content);
-        
-        if (type === 'array' || type === 'object') {
-            val = JSON.stringify(content);
-        }
-        if (type === 'string') {
-            val = content;
-        }
-        
-        if (val) {
-            sessionStorage.setItem(key, val);
-        }
-    };
-    
-    
+     * Create the jQuery plugin
+     */
     $.fn.tagInput = function(method) {
         if (Methods[method]) {
             return Methods[method].apply( this, Array.prototype.slice.call(arguments, 1));
@@ -505,64 +573,5 @@
             $.error( 'Method \'' +  method + '\' does not exist on jQuery.tagInput' );
         }
     }
-
-    /*!
-     *TODO
-     * Method to search the users
-     * \If 'term' exists in the session storage, return the value.
-     * \Otherwise we call the api.
-     * 
-     * \param string term
-     * \return void
-     */
-    //function doSearch(term) {
-    //    var self = this,
-    //        _term = $.trim(term) || null;
-    //    var onSearchCompleted = self.config.onSearchCompleted, // Callback function
-    //        promised = null; // Deferred object
-    //    
-    //    if (_term) {
-    //        // Read the saved the search results from session storage
-    //        if (self.config.localStore && (returns = sessionStorage.getItem(_term))) {
-    //            promised = function() {
-    //                var dfd = new $.Deferred(),
-    //                    _users = JSON.parse(returns);                    
-    //                
-    //                // Cache the array of users obj
-    //                self.cacheUsers(_users);
-    //                
-    //                // Resolve the deferred object
-    //                dfd.resolve();
-    //                return dfd.promise();
-    //            }();
-    //        } else {
-    //            $.ajax({
-    //                type: 'POST',
-    //                url: self.config.url,
-    //                data: { name: "John", location: "Boston" }
-    //            });
-    //            
-    //            promised = call.api(self.config.url, { term: _term }, function(data) {
-    //                if (data.status.code === 2000 && $.type(data.users) === 'array') {
-    //                    // Store it to the sessionStorage
-    //                    if (self.config.localStore) {
-    //                        self.saveToLocalStorage(_term, data.users);
-    //                    }
-    //                    
-    //                    // Cache the array of users obj
-    //                    self.cacheUsers(data.users);
-    //                }
-    //            });
-    //        }
-    //    }
-    //    
-    //    // Callback
-    //    promised.done(function() {
-    //        // Do callback function
-    //        if (onSearchCompleted && $.type(onSearchCompleted) === 'function') {
-    //            onSearchCompleted.call(self);
-    //        }
-    //    });
-    //}
 })(window, jQuery);
 
