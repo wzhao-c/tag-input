@@ -33,7 +33,16 @@
                 tester.tagInput({
                     callURL: 'http://echo.jsontest.com/key/value/one/two/name/mac',
                     localStore: false,
-                    autoSearch: false
+                    autoSearch: false,
+                    afterTagAdded: function() {
+                        console.log($(this).data('taginput').tags);
+                    },
+                    afterTagDeleted: function() {
+                        console.log($(this).data('taginput').tags);
+                    },
+                    afterSearchCompleted: function() {
+                        console.log($(this).data('taginput').tags);
+                    }
                 });
                 
                 //var tester2 = $('.test2');    

@@ -163,9 +163,9 @@
         localStore:        true,
         autoSearch:        true,
         
-        onTagAdded:        $.noop,
-        onTagRemoved:      $.noop,
-        onSearchCompleted: $.noop
+        afterTagAdded:        $.noop,
+        afterTagDeleted:      $.noop,
+        afterSearchCompleted: $.noop
     }
     
     // Public methods
@@ -343,9 +343,11 @@
                 });
             }
             
-            // Display all the tags
+            // Display all the tags after searching
             promised.done(function() {
                 renderTags.call(self);
+                
+                data.config.afterSearchCompleted.call(self);
             });
         }
     }
@@ -429,6 +431,8 @@
         }
         
         resetUI.call(this);
+        
+        data.config.afterTagAdded.call(this);
     }
     
     /*!
@@ -449,6 +453,8 @@
             
             renderTags.call(this);
         }
+        
+        data.config.afterTagDeleted.call(this);
     }
     
     /*!
