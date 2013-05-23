@@ -7,6 +7,8 @@
     function Tag(data) {
         this.text = '';
         this.link = '#';
+        this.btn = '&#10005;'; // 'x'
+        this.class = '';
         
         // Load the tag's information
         this.load(data);
@@ -24,7 +26,7 @@
          * @return object
          */
         load: function(data) {
-            var self = this;            
+            var self = this;
             
             if ($.isPlainObject(data) && !$.isEmptyObject(data)) {
                 $.each(data, function(prop, value) {
@@ -50,9 +52,12 @@
             
             if (self.text) {
                 html += '<a ';
+                if (this.class) {
+                    html += 'class="' + self.class + '" ';
+                }
                 html += 'data-text="' + self.text + '" ';
                 html += '>';
-                html += self.getText() + '<span class="input-tag-close"><i>x</i></span>';
+                html += self.getText() + '<span class="input-tag-close"><i>' + self.btn + '</i></span>';
                 html += '</a>';
                 
                 return html;                
@@ -124,6 +129,7 @@
         }
     }
     
+    var Config, CallMethods, Keys, EventActions;
     
     // Constants
     CallMethods = {
@@ -146,8 +152,6 @@
         KEYUP:   'keyup',
         SUBMIT:  'submit'
     }
-
-    var Config, CallMethods, Keys, EventActions;
     
     // Default settings
     Config = {
@@ -157,6 +161,7 @@
         rowHeight:         30,
         
         placeHolder:       '',
+        pendingClass:      'pending',
         
         callURL:           '',
         callMethod:        CallMethods.POST,
@@ -237,11 +242,25 @@
     function bindEvents() {
         var self = this,
             $this = $(this),
-            data = $this.data('taginput');        
+            data = $this.data('taginput');
         
-        // Close button - click
-        $this.on(EventActions.CLICK, 'i', function(e) {                
-            deleteTag.call(self, $(this).closest('a').data('text'));
+        // Close or Pending button - click
+        $this.on(EventActions.CLICK, 'i', function(e) {
+            var $a = $(this).closest('a');
+            
+            if ($a.hasClass(data.config.pendingClass)) {
+                // Add a new tag
+                var _tag = new Tag($a.data('text'));
+            
+                if (_tag.text && !checkTagExist(data.tags, _tag.text)) {
+                    data.tags.push(_tag);
+                    $a.removeClass(data.config.pendingClass).find('i').html(_tag.btn);
+                }
+            } else {
+                // Delete the exsiting tag
+                deleteTag.call(self, $a.data('text'));
+            }
+            
             e.preventDefault();
         });
         
@@ -263,10 +282,11 @@
             if (keycode === Keys.ENTER) {
                 if (_val) {
                     insertTag.call(self, _val);
+                    resetUI.call(self);
                     $(this).val('');
                 }
             }
-        });        
+        });
         
         // Input field - keyup
         // for ajax call
@@ -318,14 +338,19 @@
             $this = $(this),
             data = $this.data('taginput'),
             returns = '',
-            promised = {};        
+            promised = {},
+            promised_data = [];
+        
+        // Remove all pending tags
+        removeTags.call(self, true);
         
         if (parameter.getTerm()) {
             if (data.config.localStore && (returns = sessionStorage.getItem(parameter.getTerm()))) {
                 promised = function() {
                     var _dfd = new $.Deferred();
                     
-                    loadTags.call(self, JSON.parse(returns));
+                    //loadTags.call(self, JSON.parse(returns));
+                    promised_data = JSON.parse(returns);
                     
                     // Resolve the dferred obj
                     _dfd.resolve();
@@ -335,18 +360,27 @@
             } else {
                 // call function returns ajax obj
                 promised = ajaxCall(data.config.callMethod, data.config.callURL, parameter.getParams()).success(function(_data) {
-                    loadTags.call(self, _data);                    
+                    //loadTags.call(self, _data);
+                    promised_data = _data;
                     
                     if (data.config.localStore) {
-                        saveToLocalStorage(parameter.getTerm(), JSON.stringify(data.tags));
+                        saveToLocalStorage(parameter.getTerm(), JSON.stringify(_data));
                     }
                 });
             }
             
             // Display all the tags after searching
             promised.done(function() {
-                renderTags.call(self);
+                // Display all the tags
+                //renderTags.call(self);
                 
+                $.each(promised_data, function() {
+                    insertTag.call(self, this, data.config.pendingClass);
+                });
+                
+                resetUI.call(self);
+                
+                // Callback function
                 data.config.afterSearchCompleted.call(self);
             });
         }
@@ -406,7 +440,7 @@
             var _tag = new Tag(this);
             
             if (!checkTagExist(data.tags, _tag.text)) {
-                data.tags.push(new Tag(this));
+                data.tags.push(_tag);
             }
         });
     }
@@ -415,22 +449,26 @@
      * Method to insert a tag
      *
      * @param string text
+     * @param string type
      * @return void
      */
-    function insertTag(tag) {
+    function insertTag(tag, type) {
         var $this = $(this),
             data = $this.data('taginput'),
             _tag = new Tag(tag);
             
-        if (_tag.text && !checkTagExist(data.tags, _tag.text)) {            
-            data.tags.push(_tag);
+        if (_tag.text && !checkTagExist(data.tags, _tag.text)) {
+            if (type != data.config.pendingClass) {
+                data.tags.push(_tag);
+            } else {
+                _tag.class = data.config.pendingClass;
+                _tag.btn = '&#10003';
+            }
             
             $('<li></li>', {
                 html: _tag.buildHTML()
             }).insertBefore($this.find('input').parent('li'));
         }
-        
-        resetUI.call(this);
         
         data.config.afterTagAdded.call(this);
     }
@@ -526,17 +564,37 @@
         
         resetUI.call(this);
     }
-
+    
+    /*!
+     * Function to apply pending style
+     *
+     * @param array tags
+     * @return void
+     */
+    //function applyPendingStyle(added_tags) {
+    //    var $this = $(this);
+    //    
+    //    $.each(added_tags, function() {
+    //        $this.find("a[data-text='" + this.text + "']").addClass('pending');
+    //    });
+    //}
+    
     /*!
      * Method to remove all the tags.
      *
+     * @param bool pending
      * @return void
      */
-    function removeTags() {
-        var $this = $(this);
+    function removeTags(pending) {
+        var $this = $(this),
+            data = $this.data('taginput');
         
         $this.find('li').filter(function() {
-            return $(this).find('a').length;
+            if (pending) {
+                return $(this).find('a.' + data.config.pendingClass).length;
+            } else {
+                return $(this).find('a:not(.' + data.config.pendingClass +')').length;
+            }
         }).remove();
     }
     

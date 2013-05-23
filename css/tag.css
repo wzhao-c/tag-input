@@ -125,15 +125,24 @@
     color: #112434;
 }
 
+.input-tag-wrapper ul li a.pending {
+    border: 1px solid #e2b35a;
+    
+    /* Background */
+    background: #FCC764; /* Fallback */
+    background: -webkit-linear-gradient(top, #fccc73, #FCC764);
+    background: -moz-linear-gradient(top, #fccc73, #FCC764);
+    background: -ms-linear-gradient(top, #fccc73, #FCC764);
+}
 
 /* Close Button */
 /* Set the close button displays as table cell */
-.input-tag-wrapper ul li span {
+.input-tag-wrapper ul li a span {
     display: table-cell;
     vertical-align: middle;
     padding: 0 0 0 5px;
 }
-.input-tag-wrapper ul li span i {
+.input-tag-wrapper ul li a span i {
     /* Display & box model */
     height: 12px;
     width:  12px;
@@ -150,12 +159,17 @@
     -webkit-border-radius: 6px;
     border-radius:         6px;
 }
-.input-tag-wrapper ul li span i:hover {
+.input-tag-wrapper ul li a.pending span i {
+    background: #b08b46;
+}
+.input-tag-wrapper ul li a span i:hover {
     background: #FFFFFF;
     color: #5BB127;
     cursor: pointer;
 }
-
+.input-tag-wrapper ul li a.pending span i:hover {
+    color: #b08b46;
+}
 
 /* Input Field */
 .input-tag-wrapper input {

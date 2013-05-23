@@ -10,7 +10,7 @@
                 </ul>
             </div>
             
-            <button class="input-tag-search">Search</button>            
+            <button class="input-tag-search">Search</button>
         </div>
         
         <!--<div class="input-tag-wrapper test2">
@@ -31,22 +31,21 @@
                 var tester = $('.test1');
                 // Init
                 tester.tagInput({
-                    callURL: 'http://echo.jsontest.com/key/value/one/two/name/mac',
-                    localStore: false,
-                    autoSearch: false,
-                    afterTagAdded: function() {
-                        console.log($(this).data('taginput').tags);
-                    },
-                    afterTagDeleted: function() {
-                        console.log($(this).data('taginput').tags);
-                    },
-                    afterSearchCompleted: function() {
-                        console.log($(this).data('taginput').tags);
-                    }
+                    callURL: 'http://echo.jsontest.com/key/value/one/two/name/mac/microsoft/logitech/paper/pen/s1/s2/orange/robot/bear/usb',
+                    //afterTagAdded: function() {
+                    //    console.log($(this).data('taginput').tags);
+                    //},
+                    //afterTagDeleted: function() {
+                    //    console.log($(this).data('taginput').tags);
+                    //},
+                    //afterSearchCompleted: function() {
+                    //    console.log($(this).data('taginput').tags);
+                    //}
                 });
+                tester.tagInput('importData', ['pen']);
                 
-                //var tester2 = $('.test2');    
-                //tester2.tagInput();
+                //var tester2 = $('.test2');
+                //tester2.tagInput({autoSearch: true});
                 //tester2.tagInput('importData', ['text1', 'text2', 'text3', 'text4', 'text5', 'text6', 'text7', 'text8', 'text9', 'text10']);
             })(jQuery)
         </script>
