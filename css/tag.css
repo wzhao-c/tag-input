@@ -35,8 +35,8 @@
   visibility: hidden;
 }
 
-/* Magnifying Glass */
-.input-tag-wrapper button.input-tag-search {
+/* Icons */
+.input-tag-wrapper button.input-tag-btn {
     /* Display & box model */
     width:  16px;
     height: 16px;
@@ -48,14 +48,23 @@
     float: left;
     
     /* Others */
-    background: url("../img/icon-small-search-v2.png") no-repeat scroll 0 0 transparent;
     cursor: pointer;
     border: none;
     text-indent: -9999px;
+    
+    /* Magnifying Glass Icon */
+    background: url("../img/icon-search.png") no-repeat scroll 0 0 transparent;
 }
-.input-tag-wrapper button.input-tag-search:hover {
+
+.input-tag-wrapper button.input-tag-btn:hover {
     background-position: 0 -16px; 
 }
+
+/* Add Icon */
+.input-tag-wrapper button.input-tag-btn.add {
+    background: url("../img/icon-add.png") no-repeat scroll 0 0 transparent;
+}
+
 
 
 /* Tags List */
@@ -152,7 +161,7 @@
     color: #E8F6DF;
     text-shadow: none;
     text-align:  center;
-    font: normal small-caps normal 11px/11px Helvetica;
+    font: normal small-caps normal 11px/13px Arial;
     background: #73A84F;
     
     -moz-border-radius:    6px;

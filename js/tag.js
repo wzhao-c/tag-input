@@ -166,7 +166,7 @@
         callURL:           '',
         callMethod:        CallMethods.POST,
         localStore:        true,
-        autoSearch:        true,
+        autoSearch:        false,
         
         afterTagAdded:        $.noop,
         afterTagDeleted:      $.noop,
@@ -245,20 +245,30 @@
             data = $this.data('taginput');
         
         // Close or Pending button - click
-        $this.on(EventActions.CLICK, 'i', function(e) {
-            var $a = $(this).closest('a');
+        $this.on(EventActions.CLICK, 'a:not(.' + data.config.pendingClass + ') i', function(e) {
+            // Delete the exsiting tag
+            deleteTag.call(self, $(this).closest('a').data('text'));
             
-            if ($a.hasClass(data.config.pendingClass)) {
-                // Add a new tag
-                var _tag = new Tag($a.data('text'));
+            e.preventDefault();
+        });
+        
+        $this.on(EventActions.CLICK, 'a.' + data.config.pendingClass + ' i', function(e) {
+            var $a = $(this).closest('a'),
+                _tag = new Tag($a.data('text'));
             
-                if (_tag.text && !checkTagExist(data.tags, _tag.text)) {
-                    data.tags.push(_tag);
-                    $a.removeClass(data.config.pendingClass).find('i').html(_tag.btn);
-                }
-            } else {
-                // Delete the exsiting tag
-                deleteTag.call(self, $a.data('text'));
+            var $button = $this.find('button');
+            
+            if (_tag.text && !checkTagExist(data.tags, _tag.text)) {
+                data.tags.push(_tag);
+                
+                // Change the tag style
+                $a.removeClass(data.config.pendingClass).find('i').html(_tag.btn);
+                
+                // Change the button 
+                $button.addClass('add');
+                
+                // Unbind the current tag remove button event
+                $this.off(EventActions.CLICK, 'a:not(.' + data.config.pendingClass + ') i');
             }
             
             e.preventDefault();
@@ -288,6 +298,7 @@
             }
         });
         
+        // TODO
         // Input field - keyup
         // for ajax call
         if (data.config.autoSearch) {
@@ -306,11 +317,28 @@
         
         // Search button - click
         $this.on(EventActions.CLICK, 'button', function(e) {
-            var term = $this.find('input').val(),
-                parameter = new Parameter(term);
+            var $button = $(this),
+                term = $this.find('input').val();
             
-            //parameter.addParam('q', term);
-            doSearch.call(self, parameter);
+            // Do search
+            if (!$button.hasClass('add')) {
+                doSearch.call(self, new Parameter(term));
+            // Add the selected tags
+            } else {
+                $button.removeClass('add');
+                
+                // Remove all pending tags and reset UI
+                removeTags.call(self, true);
+                resetUI.call(self);
+                
+                // TODO
+                $this.on(EventActions.CLICK, 'a:not(.' + data.config.pendingClass + ') i', function(e) {
+                // Delete the exsiting tag
+                    deleteTag.call(self, $(this).closest('a').data('text'));
+                    
+                    e.preventDefault();
+                });
+            }
             
             e.preventDefault();
         });
@@ -374,11 +402,13 @@
                 // Display all the tags
                 //renderTags.call(self);
                 
-                $.each(promised_data, function() {
-                    insertTag.call(self, this, data.config.pendingClass);
-                });
-                
-                resetUI.call(self);
+                if (promised_data) {
+                    $.each(promised_data, function() {
+                        insertTag.call(self, this, data.config.pendingClass);
+                    });
+                    
+                    resetUI.call(self);
+                }
                 
                 // Callback function
                 data.config.afterSearchCompleted.call(self);
