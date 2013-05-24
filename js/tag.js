@@ -21,7 +21,7 @@
         this.text = '';
         this.link = '#';
         this.btn = '&#10005;'; // 'x'
-        this.class = '';
+        this.btnClass = '';
         
         // Load the tag's information
         this.load(data);
@@ -65,8 +65,8 @@
             
             if (self.text) {
                 html += '<a ';
-                if (this.class) {
-                    html += 'class="' + self.class + '" ';
+                if (this.btnClass) {
+                    html += 'class="' + self.btnClass + '" ';
                 }
                 html += 'data-text="' + self.text + '" ';
                 html += '>';
@@ -504,7 +504,7 @@
             if (type != data.config.pendingClass) {
                 data.tags.push(_tag);
             } else {
-                _tag.class = data.config.pendingClass;
+                _tag.btnClass = data.config.pendingClass;
                 _tag.btn = '&#10003';
             }
             
