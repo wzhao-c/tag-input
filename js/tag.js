@@ -1,3 +1,16 @@
+/**
+ * jQuery Tag Input Plugin
+ *
+ * @version 1.0
+ * @author Wei Zhao
+ * @date May 22nd, 2013
+ * 
+ * Copyright 2013, Wei Zhao
+ * Released under the MIT license.
+ *
+ * Dependencies:
+ *  jQuery 1.9.1
+ */
 ;(function(window, $, undefined) {
     'use strict';
     
