@@ -67,7 +67,7 @@
             
             if (self.text) {
                 html += '<a ';
-                html += 'href="' + self.link + '" ' + "target='_blank'";
+                html += 'href="' + self.link + '" ';
                 if (this.btnClass) {
                     html += 'class="' + self.btnClass + '" ';
                 }
@@ -306,8 +306,9 @@
                 }
             }
             
+            // if autoSearch is false
             // User hit the enter, add a new tag
-            if (keycode === Keys.ENTER) {
+            if (keycode === Keys.ENTER && !data.config.autoSearch) {
                 if (val) {
                     insertTag.call(self, val);
                     resetUI.call(self);
@@ -316,7 +317,6 @@
             }
         });
         
-        // TODO
         // Input field - keyup
         // for ajax call
         if (data.config.autoSearch) {
@@ -325,8 +325,8 @@
                     parameter = new Parameter(term);
                 
                 delay(function() {
-                    //parameter.addParam('q', term);
                     doSearch.call(self, parameter);
+                    resetUI.call(self);
                 }, 800);
                 
                 e.preventDefault();
@@ -347,7 +347,6 @@
                 
                 // Remove all pending tags and reset UI
                 removeTags.call(self, true);
-                resetUI.call(self);
                 
                 // TODO
                 $this.on(EventActions.CLICK, 'a:not(.' + data.config.pendingClass + ') i', function(e) {
@@ -358,6 +357,7 @@
                 });
             }
             
+            resetUI.call(self);
             e.preventDefault();
         });
     }
@@ -389,6 +389,8 @@
         
         // Remove all pending tags
         removeTags.call(self, true);
+        // Remove the term
+        $this.find('input').val('');
         
         if (parameter.getTerm()) {
             if (data.config.localStore && (returns = sessionStorage.getItem(parameter.getTerm()))) {

@@ -51,6 +51,30 @@ $('.element').tagInput({
     autoSearch:        false
 });
 ```
+
+## Methods
+
+### importData()
+Two ways to import a list of tags.
+####"Drive-Thru"
+```javascript
+$('.element').tagInput('importData', ['text1', 'text2', 'text3', 'text4', 'text5']);
+```
+####"Reservation"
+```javascript
+$('.element').tagInput('importData', [
+    {text: 'text1', link: 'http://www.google.com', btn: '+'},
+    {text: 'text2', link: 'http://www.yahoo.com', btn: '-'},
+    {text: 'text3', link: 'http://www.facebook.com', btn: 'o'}
+]);
+```
+
+### destory()
+Remove config data and tags data when deallocating the plugin
+```javascript
+$('.element').tagInput('destory');
+```
+
 ## Events
 
 ### afterTagAdded
@@ -77,27 +101,6 @@ $('.element').tagInput({
         // Put your code here
     }
 });
-```
-
-## Methods
-
-### importData()
-Import a list of tags. format: javascript array
-```javascript
-$('.element').tagInput('importData', ['text1', 'text2', 'text3', 'text4', 'text5']);
-```
-```javascript
-$('.element').tagInput('importData', [
-    {text: 'text1', link: 'http://www.google.com'},
-    {text: 'text2', link: 'http://www.yahoo.com'},
-    {text: 'text3', link: 'http://www.facebook.com'}
-]);
-```
-
-### destory()
-Remove config data and tags data when deallocating the plugin
-```javascript
-$('.element').tagInput('destory');
 ```
 
 ## Author
