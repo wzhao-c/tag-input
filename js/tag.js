@@ -236,7 +236,7 @@
             
             if (!data) {
                 $this.data('taginput', {
-                    config: $.extend(true, Config, config),
+                    config: $.extend(true, {}, Config, config),
                     tags: [] // Array of Tag objects
                 });
                 

@@ -1,0 +1,174 @@
+<html>
+    <head>
+        <style>
+            body {
+                font-family: "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+                font-weight: 300;
+            }
+            #content {
+                width: 50%;
+                margin: 0 auto;
+            }
+            h1 span, p {
+                font-size: 12px;
+            }
+            h1 span a {
+                text-decoration: none;
+                color: #444444;
+            }
+            h1 span a:hover {
+                color: #666666;
+            }
+            pre {
+                background-color: #f8f8f8;
+                border: 1px solid #ddd;
+                padding: 16px 10px 0 10px;
+                border-radius: 3px;
+            }
+            section {
+                margin: 0 0 40px 0;
+            }
+        </style>
+        <link href="css/tag.css" media="all" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+        <div id="content">
+            <h1>Tag Input jQuery Plugin <span>by <a href="https://github.com/wei-zhao-83">Wei Zhao</a></span></h1>
+            
+            <section>
+                <h3>Basic</h3>
+                
+                <div class="input-tag-wrapper basic">
+                    <div class="input-tag-content">
+                        <ul>
+                            <li><input class="input-tag-input" placeholder="Type anything" value="" ></li>
+                        </ul>
+                    </div>
+                    
+                    <button class="input-tag-btn">Search</button>
+                </div>
+                <pre>
+$('.basic').tagInput();
+                </pre>
+            </section>
+            
+            <section>
+                <h3>Auto-completion</h3>
+                <div class="input-tag-wrapper autocompletion">
+                    <div class="input-tag-content">
+                        <ul>
+                            <li><input class="input-tag-input" placeholder="Type anything" value="" ></li>
+                        </ul>
+                    </div>
+                    
+                    <button class="input-tag-btn">Search</button>
+                </div>
+                <pre>
+$('.autocompletion').tagInput({
+    autoSearch: true,
+    callURL: 'http://echo.jsontest.com/key/value/one/two/name/mac/microsoft/logitech/paper/pen',
+    afterTagAdded: function() {
+        //console.log($(this).data('taginput').tags);
+    },
+    afterTagDeleted: function() {
+        //console.log($(this).data('taginput').tags);
+    },
+    afterSearchCompleted: function() {
+        //console.log($(this).data('taginput').tags);
+    }
+});
+                </pre>
+            </section>
+            
+            <section>
+                <h3>Import</h3>
+                <div class="input-tag-wrapper import">
+                    <div class="input-tag-content">
+                        <ul>
+                            <li><input class="input-tag-input" placeholder="Type anything" value="" ></li>
+                        </ul>
+                    </div>
+                    
+                    <button class="input-tag-btn">Search</button>
+                </div>
+                <pre>
+// Init
+$('.import').tagInput();
+
+//$('.import').tagInput('importData', ['text1', 'text2', 'text3', 'text4', 'text5', 'text6']);
+
+$('.import').tagInput('importData', [
+    {text: 'text1', link: 'http://www.google.com', btn: '+'},
+    {text: 'text2', link: 'http://www.yahoo.com', btn: '-'},
+    {text: 'text3', link: 'http://www.facebook.com', btn: 'o'}
+]);
+                </pre>
+            </section>
+            
+            <section>
+                <h3>Other</h3>
+                <div class="input-tag-wrapper other">
+                    <div class="input-tag-content">
+                        <ul>
+                            <li><input class="input-tag-input" placeholder="Type anything" value="" ></li>
+                        </ul>
+                    </div>
+                    
+                    <button class="input-tag-btn">Search</button>
+                </div>
+                <pre>
+var other = $('.other');
+
+other.tagInput({
+    wrapperWidth:  500,
+    contentWidth:  400,
+    minInputWidth: 100,
+    placeHolder: 'Type anything'
+});
+                </pre>
+            </section>
+        </div>
+        
+        <script type="text/javascript" src="js/lib/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="js/tag.js"></script>
+        
+        <script>
+            (function() {
+                // 1. Basic
+                $('.basic').tagInput();
+                
+                // 2. Auto-completion
+                $('.autocompletion').tagInput({
+                    autoSearch: true,
+                    callURL: 'http://echo.jsontest.com/key/value/one/two/name/mac/microsoft/logitech/paper/pen',
+                    afterTagAdded: function() {
+                        //console.log($(this).data('taginput').tags);
+                    },
+                    afterTagDeleted: function() {
+                        //console.log($(this).data('taginput').tags);
+                    },
+                    afterSearchCompleted: function() {
+                        //console.log($(this).data('taginput').tags);
+                    }
+                });
+                
+                // 3. Import
+                $('.import').tagInput();
+                //$('.import').tagInput('importData', ['text1', 'text2', 'text3', 'text4', 'text5', 'text6']);
+                $('.import').tagInput('importData', [
+                    {text: 'text1', link: 'http://www.google.com', btn: '+'},
+                    {text: 'text2', link: 'http://www.yahoo.com', btn: '-'},
+                    {text: 'text3', link: 'http://www.facebook.com', btn: 'o'}
+                ]);
+                
+                // 4. Other                
+                $('.other').tagInput({
+                    wrapperWidth:  500,
+                    contentWidth:  470,
+                    minInputWidth: 100,
+                    placeHolder: 'Pellentesque quis ipsum'
+                });
+            })(jQuery)
+        </script>
+    </body>
+</html>

@@ -6,7 +6,7 @@
     margin: 0;
     
     /* Positioning */
-    float: left;
+    /* float: left; */
     
     /* Others */
     font-family: Helvetica;
@@ -44,7 +44,7 @@
     padding: 0;
     
     /* Positioning */
-    position: fixed;
+    position: relative;
     float: left;
     
     /* Others */
