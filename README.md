@@ -6,6 +6,8 @@ Tested width jQuery version 1.9.1
 
 Min file size ~ 5.6Kb
 
+![Image Alt](https://raw.github.com/wei-zhao-83/Tag-Input/master/TagInput.jpg)
+
 ### Update (May 22, 2013)
 Added the documentation.
 
