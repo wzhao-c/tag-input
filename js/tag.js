@@ -12,8 +12,6 @@
  *  jQuery 1.9.1
  */
 ;(function(window, $, undefined) {
-    'use strict';
-    
     /*!
      * Tag Model
      */
@@ -43,13 +41,13 @@
             
             if ($.isPlainObject(data) && !$.isEmptyObject(data)) {
                 $.each(data, function(prop, value) {
-                    if (self.hasOwnProperty(prop) && value != '') {
+                    if (self.hasOwnProperty(prop) && value !== '') {
                         self[prop] = value;
                     }
                 });
             }
             
-            if ($.type(data) === 'string' || $.type(data) === 'number' ) {
+            if ($.type(data) === 'string' || $.type(data) === 'number') {
                 self.text = $.trim(data);
             }
         },
@@ -117,7 +115,7 @@
             // Limit the text length
             return (text.length > Tag.Text.MAX) ? text.slice(0, (Tag.Text.MAX - 3)) + '...' : text;
         }
-    }
+    };
     
     /*!
      * URL Parameter Model
@@ -140,7 +138,7 @@
         getTerm: function() {
             return this.searchTerm;
         }
-    }
+    };
     
     var Config, CallMethods, Keys, EventActions;
     
@@ -148,7 +146,7 @@
     CallMethods = {
         GET:  'get',
         POST: 'post'
-    }
+    };
     
     Keys = {
         DELETE:    8,
@@ -156,7 +154,7 @@
         ENTER:     13,
         UP:        38,
         DOWN:      40
-    }
+    };
     
     EventActions = {
         CLICK:   'click',
@@ -164,7 +162,7 @@
         KEYDOWN: 'keydown',
         KEYUP:   'keyup',
         SUBMIT:  'submit'
-    }
+    };
     
     // Default settings
     Config = {
@@ -184,7 +182,7 @@
         afterTagAdded:        $.noop,
         afterTagDeleted:      $.noop,
         afterSearchCompleted: $.noop
-    }
+    };
     
     // Public methods
     var Methods = {
@@ -196,17 +194,16 @@
          */
         importData: function(source) {
             return this.each(function() {
-                var self = this,
-                    $this = $(this),
+                var $this = $(this),
                     data = $this.data('taginput') || {},
-                    _type = $.type(source);
+                    type = $.type(source);
                 
-                if ((_type == 'array' || _type == 'object') && data) {
+                if ((type === 'array' || type === 'object') && data) {
                     loadTags.call(this, source);
                     
                     renderTags.call(this);
                 } else {
-                    $.error( 'Error occurs' );
+                    $.error('Error occurs');
                 }
             });
         },
@@ -224,7 +221,7 @@
                 $this.removeData('taginput');
             });
         }
-    }
+    };
     
     // Private methods
     function init(config) {
@@ -267,15 +264,15 @@
         
         $this.on(EventActions.CLICK, 'a.' + data.config.pendingClass + ' i', function(e) {
             var $a = $(this).closest('a'),
-                _tag = new Tag($a.data('text'));
+                tag = new Tag($a.data('text'));
             
             var $button = $this.find('button');
             
-            if (_tag.text && !checkTagExist(data.tags, _tag.text)) {
-                data.tags.push(_tag);
+            if (tag.text && !checkTagExist(data.tags, tag.text)) {
+                data.tags.push(tag);
                 
                 // Change the tag style
-                $a.removeClass(data.config.pendingClass).find('i').html(_tag.btn);
+                $a.removeClass(data.config.pendingClass).find('i').html(tag.btn);
                 
                 // Change the button 
                 $button.addClass('add');
@@ -289,13 +286,13 @@
         
         // Input field - keydown
         $this.on(EventActions.KEYDOWN, 'input', function(e) {
-            var keycode =  e.keyCode ? e.keyCode : e.which;
-            var _val = $(this).val();
+            var keycode =  e.keyCode || e.which;
+            var val = $(this).val();
             
             // Delete the last tag if user press delete or backspace
             if (keycode === Keys.DELETE || keycode === Keys.BACKSPACE) {
                 // Check if the input field is empty
-                if (!_val) {
+                if (!val) {
                     deleteTag.call(self, $(this).parent('li').prev().find('a').data('text'));
                     e.preventDefault();
                 }
@@ -303,8 +300,8 @@
             
             // User hit the enter, add a new tag
             if (keycode === Keys.ENTER) {
-                if (_val) {
-                    insertTag.call(self, _val);
+                if (val) {
+                    insertTag.call(self, val);
                     resetUI.call(self);
                     $(this).val('');
                 }
@@ -388,24 +385,24 @@
         if (parameter.getTerm()) {
             if (data.config.localStore && (returns = sessionStorage.getItem(parameter.getTerm()))) {
                 promised = function() {
-                    var _dfd = new $.Deferred();
+                    var dfd = new $.Deferred();
                     
                     //loadTags.call(self, JSON.parse(returns));
                     promised_data = JSON.parse(returns);
                     
                     // Resolve the dferred obj
-                    _dfd.resolve();
+                    dfd.resolve();
                     
-                    return _dfd.promise();
+                    return dfd.promise();
                 }();
             } else {
                 // call function returns ajax obj
-                promised = ajaxCall(data.config.callMethod, data.config.callURL, parameter.getParams()).success(function(_data) {
+                promised = ajaxCall(data.config.callMethod, data.config.callURL, parameter.getParams()).success(function(ajaxData) {
                     //loadTags.call(self, _data);
-                    promised_data = _data;
+                    promised_data = ajaxData;
                     
                     if (data.config.localStore) {
-                        saveToLocalStorage(parameter.getTerm(), JSON.stringify(_data));
+                        saveToLocalStorage(parameter.getTerm(), JSON.stringify(ajaxData));
                     }
                 });
             }
@@ -467,7 +464,7 @@
         if (val) {
             sessionStorage.setItem(q, val);
         }
-    };
+    }
     
     /*!
      * Method to load tags
@@ -480,10 +477,10 @@
             data = $this.data('taginput');
         
         $.each(objs, function() {
-            var _tag = new Tag(this);
+            var tag = new Tag(this);
             
-            if (!checkTagExist(data.tags, _tag.text)) {
-                data.tags.push(_tag);
+            if (!checkTagExist(data.tags, tag.text)) {
+                data.tags.push(tag);
             }
         });
     }
@@ -498,18 +495,18 @@
     function insertTag(tag, type) {
         var $this = $(this),
             data = $this.data('taginput'),
-            _tag = new Tag(tag);
+            tagModel = new Tag(tag);
             
-        if (_tag.text && !checkTagExist(data.tags, _tag.text)) {
-            if (type != data.config.pendingClass) {
-                data.tags.push(_tag);
+        if (tagModel.text && !checkTagExist(data.tags, tagModel.text)) {
+            if (type !== data.config.pendingClass) {
+                data.tags.push(tagModel);
             } else {
-                _tag.btnClass = data.config.pendingClass;
-                _tag.btn = '&#10003';
+                tagModel.btnClass = data.config.pendingClass;
+                tagModel.btn = '&#10003';
             }
             
             $('<li></li>', {
-                html: _tag.buildHTML()
+                html: tagModel.buildHTML()
             }).insertBefore($this.find('input').parent('li'));
         }
         
@@ -529,7 +526,7 @@
         if (text) {
             // Unset the tag
             data.tags = $.grep(data.tags, function(tag) {
-                return tag.text != text;
+                return tag.text !== text;
             });
             
             renderTags.call(this);
@@ -549,7 +546,7 @@
         var result = false;
         
         $.each(tags, function() {
-            if (this.text == text) {
+            if (this.text === text) {
                 result = true;
             }
         });
@@ -646,12 +643,11 @@
      *
      * @return void
      */
-    function focusInput() {
-        var $this = $(this),
-            data = $this.data('taginput');
-        
-        $this.find('input').focus();
-    }
+    //function focusInput() {
+    //    var $this = $(this);
+    //    
+    //    $this.find('input').focus();
+    //}
     
     /*!
      * Function to generate the tags HTML
@@ -665,7 +661,7 @@
         if ($.type(els) === 'string') { html = els; }
         if ($.type(els) === 'array') { html = els.join(''); }
         
-        return (html) ? html : '';            
+        return html || '';
     }
     
     /*!
@@ -679,6 +675,6 @@
         } else {
             $.error( 'Method \'' +  method + '\' does not exist on jQuery.tagInput' );
         }
-    }
+    };
 })(window, jQuery);
 
