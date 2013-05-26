@@ -42,7 +42,11 @@
             if ($.isPlainObject(data) && !$.isEmptyObject(data)) {
                 $.each(data, function(prop, value) {
                     if (self.hasOwnProperty(prop) && value !== '') {
-                        self[prop] = value;
+                        if (prop === 'link') {
+                            self.setLink(value);
+                        } else {
+                            self[prop] = value;
+                        }
                     }
                 });
             }
@@ -63,6 +67,7 @@
             
             if (self.text) {
                 html += '<a ';
+                html += 'href="' + self.link + '" ' + "target='_blank'";
                 if (this.btnClass) {
                     html += 'class="' + self.btnClass + '" ';
                 }
@@ -244,6 +249,9 @@
                 'height': data.config.rowHeight
             });
             $this.find('div').eq(0).css('width', data.config.contentWidth);
+            
+            // Place Holder
+            $this.find('input').attr('placeholder', data.config.placeHolder)
             
             bindEvents.call(this);
         });

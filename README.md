@@ -42,13 +42,13 @@ $('.element').tagInput({
     minInputWidth:     30,
     rowHeight:         30,
     
-    placeHolder:    '', // TODO
+    placeHolder:       '',
     pendingClass:      'pending',
     
     callURL:           '',
     callMethod:        CallMethods.POST,
     localStore:        true,
-    autoSearch:        false // Buggy
+    autoSearch:        false
 });
 ```
 ## Events
@@ -85,6 +85,13 @@ $('.element').tagInput({
 Import a list of tags. format: javascript array
 ```javascript
 $('.element').tagInput('importData', ['text1', 'text2', 'text3', 'text4', 'text5']);
+```
+```javascript
+$('.element').tagInput('importData', [
+    {text: 'text1', link: 'http://www.google.com'},
+    {text: 'text2', link: 'http://www.yahoo.com'},
+    {text: 'text3', link: 'http://www.facebook.com'}
+]);
 ```
 
 ### destory()
