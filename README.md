@@ -56,11 +56,11 @@ $('.element').tagInput({
 
 ### importData()
 Two ways to import a list of tags.
-####"Drive-Thru"
+
 ```javascript
 $('.element').tagInput('importData', ['text1', 'text2', 'text3', 'text4', 'text5']);
 ```
-####"Reservation"
+
 ```javascript
 $('.element').tagInput('importData', [
     {text: 'text1', link: 'http://www.google.com', btn: '+'},
